@@ -136,6 +136,36 @@ def drawing_simulaion():
     heter_5 = [multi_value_simulation((30-10)**2/2/30/3/3600*2200+1, .25*m, [1,3], [0.5, 0.5], m, 'heter')  for m in m_range]
     heter_8 = [multi_value_simulation((30-10)**2/2/30/3/3600*2200+1, .25*m, [1,3], [0.2, 0.8], m, 'heter')  for m in m_range]
 
+    probability_range=np.arange(0,1.01,0.1)
+    homo_p_4=[multi_value_simulation((30-10)**2/2/30/3/3600*2200+1, .25*4, [1,3], [1-p, p], 4, 'homo') for p in probability_range]
+    heter_p_4=[multi_value_simulation((30-10)**2/2/30/3/3600*2200+1, .25*4, [1,3], [1-p, p], 4, 'heter') for p in probability_range]
+
+    fig = plt.figure(figsize=(20, 12), dpi=100)
+    ax = fig.add_subplot(111)
+    ax.plot(probability_range, [a[0] for a in homo_2], 'r-*',
+            lw=5, markersize=18, label='E[$o_{in}$], p=0.2')
+    ax.plot(probability_range, [a[0] for a in homo_5], 'g-*',
+            lw=5, markersize=18, label='E[$o_{in}$], p=0.5')
+
+    ax.plot(probability_range, [a[1] for a in homo_2], 'r:v',
+            lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.2')
+    ax.plot(probability_range, [a[1] for a in homo_5], 'g:v',
+            lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.5')
+
+    # ax.legend(fontsize=32, loc=9, ncol=3, columnspacing=.5)
+    plt.xticks([0, 2, 4, 6, 8, 10], [0, 2, 4, 6, 8, 10])
+    ax.axis([1, 11, 0, 4])
+    ax.tick_params(labelsize=38)
+    plt.xlabel('$m$ ($veh$)', fontsize=44)
+    plt.ylabel(r'E[$o_{in}$] and E[$\tilde{\omega}$] ($h_0$)', fontsize=44)
+    # plt.ylabel('$\lambda$ ($h_0$)')
+    ax.set_position([0.1, 0.1, 0.6, 0.85])
+    ax.legend(fontsize=36, loc='center left', bbox_to_anchor=(1, 0, 1.2, 1))
+    plt.savefig('homo.png')
+    plt.close()
+    plt.clf()
+
+
     fig = plt.figure(figsize=(20, 12), dpi=100)
     ax = fig.add_subplot(111)
     ax.plot(m_range, [a[0] for a in homo_2], 'r-*',
@@ -144,13 +174,10 @@ def drawing_simulaion():
             lw=5, markersize=18, label='E[$o_{in}$], p=0.5')
     ax.plot(m_range, [a[0] for a in homo_8], 'b-*',
             lw=5, markersize=18, label='E[$o_{in}$], p=0.8')
-
     ax.plot(m_range, [a[1] for a in homo_2], 'r:v',
             lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.2')
-
     ax.plot(m_range, [a[1] for a in homo_5], 'g:v',
             lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.5')
-
     ax.plot(m_range, [a[1] for a in homo_8], 'b:v',
             lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.8')
 
@@ -175,13 +202,10 @@ def drawing_simulaion():
             lw=5, markersize=18, label='E[$o_{in}$], p=0.5')
     ax.plot(m_range, [a[0] for a in heter_8], 'b-*',
             lw=5, markersize=18, label='E[$o_{in}$], p=0.8')
-
     ax.plot(m_range, [a[1] for a in heter_2], 'r:v',
             lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.2')
-
     ax.plot(m_range, [a[1] for a in heter_5], 'g:v',
             lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.5')
-
     ax.plot(m_range, [a[1] for a in heter_8], 'b:v',
             lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.8')
     plt.xticks([0, 2, 4, 6, 8, 10], [0, 2, 4, 6, 8, 10])
@@ -218,6 +242,23 @@ def drawing_simulaion():
     ax.legend(fontsize=36, loc='center left', bbox_to_anchor=(1, 0, 1.2, 1))
     # plt.ylabel('$\lambda$ ($h_0$)')
     plt.savefig('results.png')
+    plt.close()
+    plt.clf()
+
+def draw_fig(fig_name,x,y_list,name_list,style_list,x_label,y_label,customized_x_ticks,customized_axis):
+    fig = plt.figure(figsize=(20, 12), dpi=100)
+    ax = fig.add_subplot(111)
+    for i in range(len(y_list)):
+        ax.plot(x, y_list[i], style_list[i],
+            lw=5, markersize=18, label=name_list[i])
+    plt.xticks(customized_x_ticks, customized_x_ticks)
+    ax.axis(customized_axis)
+    ax.tick_params(labelsize=38)
+    plt.xlabel(x_label, fontsize=44)
+    plt.ylabel(y_label, fontsize=44)
+    ax.set_position([0.1, 0.1, 0.6, 0.85])
+    ax.legend(fontsize=36, loc='center left', bbox_to_anchor=(1, 0, 1.2, 1))
+    plt.savefig(fig_name)
     plt.close()
     plt.clf()
 

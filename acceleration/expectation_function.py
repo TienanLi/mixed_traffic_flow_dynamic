@@ -287,7 +287,6 @@ def simulation_heter(o,lamb,p,amp_index,platoon_length,stochasticity_gap,stochas
                                 o_CF += o_l * (CF_coef_a_l - 1)
                                 o_l = o_l * CF_coef_a_l
 
-
                             if o_l > 100:
                                 break
                         if CF_type == 'linear':
@@ -301,8 +300,6 @@ def simulation_heter(o,lamb,p,amp_index,platoon_length,stochasticity_gap,stochas
                                 o_l = o_l + CF_coef_a_l
                             if o_l > 100:
                                 break
-
-
 
         o_in_g.append(o_in)
         omega_g.append(omega)
