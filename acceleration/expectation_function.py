@@ -321,15 +321,10 @@ def ran_type_multiple(a_group,p_group):
         if type_random <= cdf[i]:
             return a_group[i]
 
-def multi_value_simulation(o,lamb,a_group,p_group,platoon_length,scenario):
+def multi_value_simulation(initial_void,lamb,a_group,p_group,platoon_length,scenario):
     print(a_group,p_group,platoon_length, scenario)
 
-    initial_void=o
-
     L_c_range=[platoon_length]
-
-    record=[]
-
     platoon_number = []
     vehicle_number = []
     used_gap = []
@@ -347,13 +342,12 @@ def multi_value_simulation(o,lamb,a_group,p_group,platoon_length,scenario):
         j=0 #affected platoon
         num_veh=0. #affected vehicle number
 
-
-        follower_a = ran_type_multiple(a_group, p_group)  # gap amplification
+        follower_a = ran_type_multiple(a_group, p_group)  # initial gap amplification (LC vehicle)
         if follower_a < current_a:
-            o_l = 1 + (o_l - 1) * (current_a / follower_a)
+            o_l = 1 + (o_l - 1) * (current_a / follower_a) #h_0 + void
             current_a = follower_a
 
-        o_in = o_l - 1
+        o_in = o_l - 1 # without the h_0 part, only this part will be amplified
         omega = 0
 
         while o_l>0:
@@ -380,9 +374,9 @@ def multi_value_simulation(o,lamb,a_group,p_group,platoon_length,scenario):
                 for i in range(this_platoon_type):
                     follower_a = ran_type_multiple(a_group, p_group)  # gap amplification
                     if follower_a < current_a:
-                        o_l = min(o_l, o_in)
-                        omega = o_l * (current_a / follower_a - 1)
-                        o_l = o_l * (current_a / follower_a)
+                        omega = min(o_l, o_in) * (current_a / follower_a - 1) #only the void part is amplified, if h_0 is not fully resolved yet
+                        o_l = o_l + omega
+                        o_in = o_in * (current_a / follower_a) # basic magnitude of the void part
                         current_a = follower_a
 
         o_in_g.append(o_in)

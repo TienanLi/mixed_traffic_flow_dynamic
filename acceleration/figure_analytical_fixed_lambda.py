@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from math import floor
 import numpy as np
-from expectation_function import simulation_heter, simulation_homo, multi_value_simulation
+from expectation_function import multi_value_simulation
 
 def get_lamb(q, m): # unit in h_0
     return (1 / q - 1) * m
@@ -24,7 +24,6 @@ def get_term2(h_0, a_s, a_l, p, o_l, lamb, m, K_star_2, type, K_star_1):
     term_3 = lamb * (( p ** (coef * K_star_1) - p ** (coef * K_star_2)) / (1 - p ** coef) + K_star_1 * p ** (coef * K_star_1) - K_star_2 * p ** (coef * K_star_2))
 
     return R_ls * p * (term_1 + term_2 - term_3)
-
 
 def analytical_result(u, v_0, a_s, a_l, q, m, p, h_0, type):
     lamb = get_lamb(q, m) * h_0
@@ -129,13 +128,7 @@ def drawing_analytical():
 
 def drawing_simulaion():
     m_range = range(1, 12)
-    # homo_2 = [simulation_homo((30-10)**2/2/30/3/3600*2200+1, .25*m, p=0.2, amp_index=3, platoon_length = m) for m in m_range]
-    # homo_5 = [simulation_homo((30-10)**2/2/30/3/3600*2200+1, .25*m, p=0.5, amp_index=3, platoon_length = m) for m in m_range]
-    # homo_8 = [simulation_homo((30-10)**2/2/30/3/3600*2200+1, .25*m, p=0.8, amp_index=3, platoon_length = m) for m in m_range]
-    # heter_2 = [simulation_heter((30-10)**2/2/30/3/3600*2200+1, .25*m, p=0.2, amp_index=3, platoon_length = m) for m in m_range]
-    # heter_5 = [simulation_heter((30-10)**2/2/30/3/3600*2200+1, .25*m, p=0.5, amp_index=3, platoon_length = m) for m in m_range]
-    # heter_8 = [simulation_heter((30-10)**2/2/30/3/3600*2200+1, .25*m, p=0.8, amp_index=3, platoon_length = m) for m in m_range]
-    #
+
     homo_2 = [multi_value_simulation((30-10)**2/2/30/3/3600*2200+1, .25*m, [1,3], [0.8, 0.2], m, 'homo') for m in m_range]
     homo_5 = [multi_value_simulation((30-10)**2/2/30/3/3600*2200+1, .25*m, [1,3], [0.5, 0.5], m, 'homo') for m in m_range]
     homo_8 = [multi_value_simulation((30-10)**2/2/30/3/3600*2200+1, .25*m, [1,3], [0.2, 0.8], m, 'homo') for m in m_range]
@@ -160,7 +153,6 @@ def drawing_simulaion():
 
     ax.plot(m_range, [a[1] for a in homo_8], 'b:v',
             lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.8')
-
 
     # ax.legend(fontsize=32, loc=9, ncol=3, columnspacing=.5)
     plt.xticks([0, 2, 4, 6, 8, 10], [0, 2, 4, 6, 8, 10])
