@@ -127,7 +127,7 @@ def drawing_analytical():
     plt.clf()
 
 def drawing_simulaion():
-    m_range = range(1, 12)
+    m_range = range(1, 3)
 
     homo_2 = [multi_value_simulation((30-10)**2/2/30/3/3600*2200+1, .25*m, [1,3], [0.8, 0.2], m, 'homo') for m in m_range]
     homo_5 = [multi_value_simulation((30-10)**2/2/30/3/3600*2200+1, .25*m, [1,3], [0.5, 0.5], m, 'homo') for m in m_range]
@@ -161,9 +161,10 @@ def drawing_simulaion():
     # plt.ylabel('$\lambda$ ($h_0$)')
     ax.set_position([0.1, 0.1, 0.6, 0.85])
     ax.legend(fontsize=36, loc='center left', bbox_to_anchor=(1, 0, 1.2, 1))
-    plt.savefig('homo.png')
+    plt.savefig('probability.png')
     plt.close()
     plt.clf()
+
 
 
     fig = plt.figure(figsize=(20, 12), dpi=100)
@@ -193,6 +194,15 @@ def drawing_simulaion():
     plt.savefig('homo.png')
     plt.close()
     plt.clf()
+
+    y_list=[[a[0] for a in homo_2],[a[0] for a in homo_5],[a[0] for a in homo_8],[a[1] for a in homo_2],[a[1] for a in homo_5],[a[1] for a in homo_8]]
+    name_list=['E[$o_{in}$], p=0.2','E[$o_{in}$], p=0.5','E[$o_{in}$], p=0.8',r'E[$\tilde{\omega}$], p=0.2',r'E[$\tilde{\omega}$], p=0.5',r'E[$\tilde{\omega}$], p=0.8']
+    style_list=['r-*','g-*','b-*','r:v','g:v','b:v']
+    x_label='$m$ ($veh$)'
+    y_label=r'E[$o_{in}$] and E[$\tilde{\omega}$] ($h_0$)'
+    customized_x_ticks=[0, 2, 4, 6, 8, 10]
+    customized_axis=[1, 11, 0, 4]
+    draw_fig('homo_test.png', m_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
 
     fig = plt.figure(figsize=(20, 12), dpi=100)
     ax = fig.add_subplot(111)
