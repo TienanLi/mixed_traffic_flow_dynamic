@@ -1,7 +1,89 @@
 import matplotlib.pyplot as plt
 from math import floor
 import numpy as np
-from expectation_function import multi_value_simulation
+import statistics
+import random
+
+def ran_type(a_l_penetration):
+    type_random = random.random()
+    if type_random >= a_l_penetration:
+        type = True  # 1 indicates a_s
+    else:
+        type = False
+    return type
+
+def ran_type_multiple(a_l_penetration, m):
+    vehicle_types=[]
+    for i in range(m):
+        vehicle_types.append(ran_type(a_l_penetration))
+    return vehicle_types
+
+def multi_value_simulation(initial_void,lamb,a_group,p_group,platoon_length,scenario):
+    print(a_group,p_group,platoon_length, scenario)
+
+    L_c_range=[platoon_length]
+    platoon_number = []
+    vehicle_number = []
+    used_gap = []
+    o_cum = []
+    o_in_g=[]
+    omega_g=[]
+
+    lambda_expectation = lamb
+    L_c=L_c_range[0]
+
+    for i in range(10000):
+        current_a = max(a_group)
+        o_l = initial_void
+        num=0. #used gap
+        j=0 #affected platoon
+        num_veh=0. #affected vehicle number
+
+        follower_a = ran_type_multiple(a_group, p_group)  # initial gap amplification (LC vehicle)
+        if follower_a < current_a:
+            o_l = 1 + (o_l - 1) * (current_a / follower_a) #h_0 + void
+            current_a = follower_a
+
+        o_in = o_l - 1 # without the h_0 part, only this part will be amplified
+        omega = 0
+
+        while o_l>0:
+            gap=np.random.exponential(lambda_expectation) #gap size
+
+            if o_l>gap:#counted the used gap
+                num = num + 1.
+            else:
+                num=num+o_l/gap
+
+            o_l = o_l - gap #gap resolve
+
+            if o_l>0: #if o_l still larger than 0, means it will influence the following platoon, count the platoon info
+                j+=1
+
+                this_platoon_length=np.random.random_integers(1,2*L_c-1)
+                num_veh+=this_platoon_length
+
+                if scenario == 'heter':
+                    this_platoon_type=this_platoon_length
+                if scenario == 'homo':
+                    this_platoon_type=1
+
+                for i in range(this_platoon_type):
+                    follower_a = ran_type_multiple(a_group, p_group)  # gap amplification
+                    if follower_a < current_a:
+                        omega = min(o_l, o_in) * (current_a / follower_a - 1) #only the void part is amplified, if h_0 is not fully resolved yet
+                        o_l = o_l + omega
+                        o_in = o_in * (current_a / follower_a) # basic magnitude of the void part
+                        current_a = follower_a
+
+        o_in_g.append(o_in)
+        omega_g.append(omega)
+        o_cum.append(o_in+omega)
+        used_gap.append(num)
+        platoon_number.append(j)
+        vehicle_number.append(num_veh)
+
+    return (statistics.mean(o_in_g),statistics.mean(omega_g),statistics.mean(o_cum))
 
 def get_lamb(q, m): # unit in h_0
     return (1 / q - 1) * m
@@ -26,7 +108,7 @@ def get_term2(h_0, a_s, a_l, p, o_l, lamb, m, K_star_2, type, K_star_1):
     term_3_numerical=0
     for k in range(K_star_1+1,K_star_2+1):
         term_3_numerical += k*(p**(k-1))*(1-p)
-    print(K_star_1,K_star_2,p,term_3,term_3_numerical)
+    # print(K_star_1,K_star_2,p,term_3,term_3_numerical)
 
     return R_ls * p * (term_1 + term_2 - term_3_numerical)
 

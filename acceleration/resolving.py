@@ -143,5 +143,5 @@ def main():
     for rec in record:
         print(rec[0],rec[1],rec[2],rec[3],rec[4])
 
-if __name__ == '__main__':
-    main()
+
+main()
