@@ -19,11 +19,16 @@ def get_term2(h_0, a_s, a_l, p, o_l, lamb, m, K_star_2, type, K_star_1):
     if type == 'heter':
         coef = m
 
-    term_1 = o_l * (1 - p ** (coef * K_star_1))
-    term_2 = (o_l + h_0) * (p ** (coef * K_star_1) - p ** (coef * K_star_2))
-    term_3 = lamb * (( p ** (coef * K_star_1) - p ** (coef * K_star_2)) / (1 - p ** coef) + K_star_1 * p ** (coef * K_star_1) - K_star_2 * p ** (coef * K_star_2))
+    p=p**coef
+    term_1 = o_l * (1 - p ** (K_star_1))
+    term_2 = (o_l + h_0) * (p ** (K_star_1) - p ** (K_star_2))
+    term_3 = lamb * (( p ** (K_star_1) - p ** (K_star_2)) / (1 - p ) + K_star_1 * p ** (K_star_1) - K_star_2 * p ** (K_star_2))
+    term_3_numerical=0
+    for k in range(K_star_1+1,K_star_2+1):
+        term_3_numerical += k*(p**(k-1))*(1-p)
+    print(K_star_1,K_star_2,p,term_3,term_3_numerical)
 
-    return R_ls * p * (term_1 + term_2 - term_3)
+    return R_ls * p * (term_1 + term_2 - term_3_numerical)
 
 def analytical_result(u, v_0, a_s, a_l, q, m, p, h_0, type):
     lamb = get_lamb(q, m) * h_0
@@ -36,95 +41,57 @@ def analytical_result(u, v_0, a_s, a_l, q, m, p, h_0, type):
     return [term_1/h_0, term_2/h_0, (term_1 + term_2) / h_0]
 
 def drawing_analytical():
+    p_range=np.arange(0,1,0.1)
+    homo_m_4=[analytical_result(30, 10, 1., 3., .8, 4, p, 3600 / 2200, 'homo') for p in p_range]
+    heter_m_4=[analytical_result(30, 10, 1., 3., .8, 4, p, 3600 / 2200, 'heter') for p in p_range]
+    y_list = [[a[0] for a in homo_m_4],
+              [a[0] for a in heter_m_4],
+              [a[1] for a in homo_m_4],
+              [a[1] for a in heter_m_4]]
+    name_list=['E[$o_{in}$], homo','E[$o_{in}$],heter',r'E[$\tilde{\omega}$], homo',r'E[$\tilde{\omega}$], heter']
+    style_list=['r-*','g-*','r:v','g:v']
+    x_label='$m$ ($veh$)'
+    y_label=r'E[$o_{in}$] and E[$\tilde{\omega}$] ($h_0$)'
+    customized_x_ticks=[0,0.3,0.6,0.9]
+    customized_axis=[0, 0.9, 0, 4]
+    draw_fig('p_range.png', p_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
+
     m_range = range(1, 12)
-    fig = plt.figure(figsize=(20, 12), dpi=100)
-    ax = fig.add_subplot(111)
-    plt.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.2, 3600 / 2200, 'homo')[0] for m in m_range],'r-*',
-            lw=5, markersize = 18, label= 'E[$o_{in}$], p=0.2')
-    plt.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.5, 3600 / 2200, 'homo')[0] for m in m_range], 'g-*',
-            lw=5, markersize = 18,label='E[$o_{in}$], p=0.5')
-    plt.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.8, 3600 / 2200, 'homo')[0] for m in m_range], 'b-*',
-            lw=5, markersize = 18,label='E[$o_{in}$], p=0.8')
-    plt.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.2, 3600 / 2200, 'homo')[1] for m in m_range], 'r:v',
-            lw=5, markersize = 18,label=r'E[$\tilde{\omega}$], p=0.2')
 
-    plt.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.5, 3600 / 2200, 'homo')[1] for m in m_range], 'g:v',
-            lw=5, markersize = 18,label=r'E[$\tilde{\omega}$], p=0.5')
+    homo_2=[analytical_result(30, 10, 1., 3., .8, m, 0.2, 3600 / 2200, 'homo') for m in m_range]
+    homo_5=[analytical_result(30, 10, 1., 3., .8, m, 0.5, 3600 / 2200, 'homo') for m in m_range]
+    homo_8=[analytical_result(30, 10, 1., 3., .8, m, 0.8, 3600 / 2200, 'homo') for m in m_range]
+    y_list=[[a[0] for a in homo_2],[a[0] for a in homo_5],[a[0] for a in homo_8],[a[1] for a in homo_2],[a[1] for a in homo_5],[a[1] for a in homo_8]]
+    name_list=['E[$o_{in}$], p=0.2','E[$o_{in}$], p=0.5','E[$o_{in}$], p=0.8',r'E[$\tilde{\omega}$], p=0.2',r'E[$\tilde{\omega}$], p=0.5',r'E[$\tilde{\omega}$], p=0.8']
+    style_list=['r-*','g-*','b-*','r:v','g:v','b:v']
+    customized_x_ticks=[0, 2, 4, 6, 8, 10]
+    customized_axis=[1, 11, 0, 4]
+    draw_fig('homo.png', m_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
 
-    plt.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.8, 3600 / 2200, 'homo')[1] for m in m_range], 'b:v',
-            lw=5, markersize = 18,label=r'E[$\tilde{\omega}$], p=0.8')
+    heter_2 = [analytical_result(30, 10, 1., 3., .8, m, 0.2, 3600 / 2200, 'heter') for m in m_range]
+    heter_5 = [analytical_result(30, 10, 1., 3., .8, m, 0.5, 3600 / 2200, 'heter') for m in m_range]
+    heter_8 = [analytical_result(30, 10, 1., 3., .8, m, 0.8, 3600 / 2200, 'heter') for m in m_range]
+    y_list = [[a[0] for a in heter_2], [a[0] for a in heter_5], [a[0] for a in heter_8], [a[1] for a in heter_2],
+              [a[1] for a in heter_5], [a[1] for a in heter_8]]
+    draw_fig('heter.png', m_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
 
-        # ax.legend(fontsize=32, loc=9, ncol=3, columnspacing =.5)
-    plt.xticks([0, 2, 4, 6, 8, 10], [0, 2, 4, 6, 8, 10])
-    plt.axis([1, 11, 0, 4])
-    plt.tick_params(labelsize=38)
-    plt.xlabel('$m$ ($veh$)', fontsize=44)
-    plt.ylabel(r'E[$o_{in}$] and E[$\tilde{\omega}$] ($h_0$)', fontsize=44)
-    # plt.ylabel('$\lambda$ ($h_0$)')
-
-    ax.set_position([0.1, 0.1, 0.6, 0.85])
-    ax.legend(fontsize=36, loc='center left', bbox_to_anchor=(1, 0, 1.2, 1))
-    # plt.show()
-    plt.savefig('homo.png')
-    plt.close()
-    plt.clf()
-
-    fig = plt.figure(figsize=(20, 12), dpi=100)
-    ax = fig.add_subplot(111)
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.2, 3600 / 2200, 'heter')[0] for m in m_range], 'r-*',
-            lw=5, markersize=18, label='E[$o_{in}$], p=0.2')
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.5, 3600 / 2200, 'heter')[0] for m in m_range], 'g-*',
-            lw=5, markersize=18, label='E[$o_{in}$], p=0.5')
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.8, 3600 / 2200, 'heter')[0] for m in m_range], 'b-*',
-            lw=5, markersize=18, label='E[$o_{in}$], p=0.8')
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.2, 3600 / 2200, 'heter')[1] for m in m_range], 'r:v',
-            lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.2')
-
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.5, 3600 / 2200, 'heter')[1] for m in m_range], 'g:v',
-            lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.5')
-
-
-
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.8, 3600 / 2200, 'heter')[1] for m in m_range], 'b:v',
-            lw=5, markersize=18, label=r'E[$\tilde{\omega}$], p=0.8')
-    ax.legend(fontsize=32, loc=9,  ncol=3, columnspacing=.5)
-    plt.xticks([0, 2, 4, 6, 8, 10], [0, 2, 4, 6, 8, 10])
-    ax.axis([1, 11, 0, 4])
-    ax.tick_params(labelsize=38)
-    plt.xlabel('$m$ ($veh$)', fontsize=44)
-    plt.ylabel(r'E[$o_{in}$] and E[$\tilde{\omega}$] ($h_0$)', fontsize=44)
-    ax.set_position([0.1, 0.1, 0.6, 0.85])
-    ax.legend(fontsize=36, loc='center left', bbox_to_anchor=(1, 0, 1.2, 1))
-    plt.savefig('heter.png')
-    plt.close()
-    plt.clf()
-
-    fig = plt.figure(figsize=(20, 12), dpi=100)
-    ax = fig.add_subplot(111)
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.2, 3600 / 2200, 'homo')[2] for m in m_range],'r-*',
-            lw=5, markersize = 18, label= 'homo, p=0.2')
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.5, 3600 / 2200, 'homo')[2] for m in m_range], 'g-*',
-            lw=5, markersize = 18,label='homo, p=0.5')
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.8, 3600 / 2200, 'homo')[2] for m in m_range], 'b-*',
-            lw=5, markersize = 18,label='homo, p=0.8')
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.2, 3600 / 2200, 'heter')[2] for m in m_range], 'r:v',
-            lw=5, markersize = 18,label='mixed, p=0.2')
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.5, 3600 / 2200, 'heter')[2] for m in m_range], 'g:v',
-            lw=5, markersize = 18,label='mixed, p=0.5')
-    ax.plot(m_range, [analytical_result(30, 10, 1., 3., .8, m, 0.8, 3600 / 2200, 'heter')[2] for m in m_range], 'b:v',
-            lw=5, markersize = 18,label='mixed, p=0.8')
-    ax.legend(fontsize=32, ncol=2)
-    plt.xticks([0, 2, 4, 6, 8, 10], [0, 2, 4, 6, 8, 10])
-    ax.axis([1, 11, 1.8, 4.2])
-    ax.tick_params(labelsize=38)
-    plt.xlabel('$m$ ($veh$)', fontsize=44)
-    plt.ylabel('E[$o_{cum}$] ($h_0$)', fontsize=44)
-    ax.set_position([0.1, 0.1, 0.6, 0.85])
-    ax.legend(fontsize=36, loc='center left', bbox_to_anchor=(1, 0, 1.2, 1))
-    # plt.ylabel('$\lambda$ ($h_0$)')
-    plt.savefig('results.png')
-    plt.close()
-    plt.clf()
+    y_list = [[a[2] for a in homo_2],
+              [a[2] for a in homo_5],
+              [a[2] for a in homo_8],
+              [a[2] for a in heter_2],
+              [a[2] for a in heter_5],
+              [a[2] for a in heter_8]]
+    name_list=['homo, p=0.2',
+               'homo, p=0.5',
+               'homo, p=0.8',
+               'mixed, p=0.2',
+               'mixed, p=0.5',
+               'mixed, p=0.8']
+    customized_axis=[1, 11, 1.8, 4.2]
+    y_label=r'E[$o_{cum}$] ($h_0$)'
+    style_list=['r-*','g-*','b-*','r:v','g:v','b:v']
+    customized_x_ticks=[0, 2, 4, 6, 8, 10]
+    draw_fig('results.png', m_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
 
 def drawing_simulaion():
     m_range = range(1, 3)
