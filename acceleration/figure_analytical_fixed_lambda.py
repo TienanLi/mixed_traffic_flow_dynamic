@@ -104,11 +104,11 @@ def get_term2(h_0, a_s, a_l, p, o_l, lamb, m, K_star_2, type, K_star_1):
     p=p**coef
     term_1 = o_l * (1 - p ** (K_star_1))
     term_2 = (o_l + h_0) * (p ** (K_star_1) - p ** (K_star_2))
-    term_3 = lamb * (( p ** (K_star_1) - p ** (K_star_2)) / (1 - p ) + K_star_1 * p ** (K_star_1) - K_star_2 * p ** (K_star_2))
+    # term_3 = lamb * (( p ** (K_star_1) - p ** (K_star_2)) / (1 - p ) + K_star_1 * p ** (K_star_1) - K_star_2 * p ** (K_star_2))
     term_3_numerical=0
     for k in range(K_star_1+1,K_star_2+1):
-        term_3_numerical += k*(p**(k-1))*(1-p)
-    # print(K_star_1,K_star_2,p,term_3,term_3_numerical)
+        term_3_numerical += k*lamb*(p**(k-1))*(1-p)
+    print(K_star_1,K_star_2,o_l,h_0,lamb,m)
 
     return R_ls * p * (term_1 + term_2 - term_3_numerical)
 
@@ -123,20 +123,23 @@ def analytical_result(u, v_0, a_s, a_l, q, m, p, h_0, type):
     return [term_1/h_0, term_2/h_0, (term_1 + term_2) / h_0]
 
 def drawing_analytical():
-    p_range=np.arange(0,1,0.1)
-    homo_m_4=[analytical_result(30, 10, 1., 3., .8, 4, p, 3600 / 2200, 'homo') for p in p_range]
-    heter_m_4=[analytical_result(30, 10, 1., 3., .8, 4, p, 3600 / 2200, 'heter') for p in p_range]
-    y_list = [[a[0] for a in homo_m_4],
-              [a[0] for a in heter_m_4],
-              [a[1] for a in homo_m_4],
-              [a[1] for a in heter_m_4]]
-    name_list=['E[$o_{in}$], homo','E[$o_{in}$],heter',r'E[$\tilde{\omega}$], homo',r'E[$\tilde{\omega}$], heter']
-    style_list=['r-*','g-*','r:v','g:v']
-    x_label='$m$ ($veh$)'
-    y_label=r'E[$o_{in}$] and E[$\tilde{\omega}$] ($h_0$)'
-    customized_x_ticks=[0,0.3,0.6,0.9]
-    customized_axis=[0, 0.9, 0, 4]
-    draw_fig('p_range.png', p_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
+    for m_test in range(1,11):
+        p_range=np.arange(0,1.01,0.05)
+        homo_m_4=[analytical_result(30, 10, 1., 3., .8, m_test, p, 3600 / 2200, 'homo') for p in p_range]
+        heter_m_4=[analytical_result(30, 10, 1., 3., .8, m_test, p, 3600 / 2200, 'heter') for p in p_range]
+        y_list = [[a[0] for a in homo_m_4],
+                  [a[0] for a in heter_m_4],
+                  [a[1] for a in homo_m_4],
+                  [a[1] for a in heter_m_4]]
+        name_list=['E[$o_{in}$], homo','E[$o_{in}$],heter',r'E[$\tilde{\omega}$], homo',r'E[$\tilde{\omega}$], heter']
+        style_list=['r-*','g-*','r:v','g:v']
+        x_label='$p$'
+        y_label=r'E[$o_{in}$] and E[$\tilde{\omega}$] ($h_0$)'
+        customized_x_ticks=[0,0.3,0.6,0.9]
+        customized_axis=[0, 1, 0, 4]
+        draw_fig('p_range_m=%s.png'%m_test, p_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
+
+    return None
 
     m_range = range(1, 12)
 
