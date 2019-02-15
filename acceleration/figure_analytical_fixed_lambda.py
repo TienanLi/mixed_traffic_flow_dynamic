@@ -101,8 +101,6 @@ def get_term2(h_0, a_s, a_l, p, o_l, lamb, m, K_star_2, type, K_star_1):
     if type == 'heter':
         coef = m
 
-
-
     pm=p**coef
     term_1 = o_l * (1 - pm ** (K_star_1))
     term_2 = (o_l + h_0) * (pm ** (K_star_1) - pm ** (K_star_2))
@@ -124,6 +122,52 @@ def analytical_result(u, v_0, a_s, a_l, q, m, p, h_0, type):
     return [term_1/h_0, term_2/h_0, (term_1 + term_2) / h_0]
 
 def drawing_analytical():
+    free_flow_speed = 30
+    inserting_speed = 10
+    m_test = 4
+    p = [0.2, 0.5, 0.8]
+    flow_level_range = np.arange(0.525, 1, 0.025)
+    homo_m_2 = [
+        analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m_test, p[0], 3600 / 2200, 'homo') for
+        flow_level in flow_level_range]
+    heter_m_2 = [
+        analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m_test, p[1], 3600 / 2200, 'homo') for
+        flow_level in flow_level_range]
+    homo_m_4 = [
+        analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m_test, p[2], 3600 / 2200, 'homo') for
+        flow_level in flow_level_range]
+    heter_m_4 = [
+        analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m_test, p[0], 3600 / 2200, 'heter') for
+        flow_level in flow_level_range]
+    homo_m_8 = [
+        analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m_test, p[1], 3600 / 2200, 'heter') for
+        flow_level in flow_level_range]
+    heter_m_8 = [
+        analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m_test, p[2], 3600 / 2200, 'heter') for
+        flow_level in flow_level_range]
+    y_list = [[a[2] for a in homo_m_2],
+              [a[2] for a in heter_m_2],
+              [a[2] for a in homo_m_4],
+              [a[2] for a in heter_m_4],
+              [a[2] for a in homo_m_8],
+              [a[2] for a in heter_m_8]
+              ]
+    name_list = ['homo, p=0.2',
+                 'homo, p=0.5',
+                 'homo, p=0.8',
+                 'mixed, p=0.2',
+                 'mixed, p=0.5',
+                 'mixed, p=0.8']
+    style_list = ['r-*', 'g-*', 'b-*', 'r:v', 'g:v', 'b:v']
+    x_label = 'flow level'
+    y_label = r'E[$o_{cum}$] ($h_0$)'
+    customized_x_ticks = [0.6, 0.7, 0.8, 0.9]
+    customized_axis = [0.525, 0.975, 1.5, 4.5]
+    draw_fig('m=4.png', flow_level_range, y_list,
+             name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
+
+    return None
+
     free_flow_speed=40
     inserting_speed=10
     flow_level=.8
@@ -142,6 +186,7 @@ def drawing_analytical():
         customized_x_ticks=[0,0.2,0.4,0.6,0.8,1]
         customized_axis=[0, 1, 0, 4]
         draw_fig('probability_mono/ffs=%s fl=%s m=%s.png'%(free_flow_speed,flow_level,m_test), p_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
+
 
     m_range = range(1, 12)
 
@@ -218,8 +263,6 @@ def drawing_simulaion():
     plt.savefig('probability.png')
     plt.close()
     plt.clf()
-
-
 
     fig = plt.figure(figsize=(20, 12), dpi=100)
     ax = fig.add_subplot(111)
