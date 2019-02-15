@@ -101,14 +101,15 @@ def get_term2(h_0, a_s, a_l, p, o_l, lamb, m, K_star_2, type, K_star_1):
     if type == 'heter':
         coef = m
 
-    p=p**coef
-    term_1 = o_l * (1 - p ** (K_star_1))
-    term_2 = (o_l + h_0) * (p ** (K_star_1) - p ** (K_star_2))
+
+
+    pm=p**coef
+    term_1 = o_l * (1 - pm ** (K_star_1))
+    term_2 = (o_l + h_0) * (pm ** (K_star_1) - pm ** (K_star_2))
     # term_3 = lamb * (( p ** (K_star_1) - p ** (K_star_2)) / (1 - p ) + K_star_1 * p ** (K_star_1) - K_star_2 * p ** (K_star_2))
     term_3_numerical=0
     for k in range(K_star_1+1,K_star_2+1):
-        term_3_numerical += k*lamb*(p**(k-1))*(1-p)
-    print(K_star_1,K_star_2,o_l,h_0,lamb,m)
+        term_3_numerical += k*lamb*(pm**(k-1))*(1-pm)
 
     return R_ls * p * (term_1 + term_2 - term_3_numerical)
 
@@ -123,10 +124,13 @@ def analytical_result(u, v_0, a_s, a_l, q, m, p, h_0, type):
     return [term_1/h_0, term_2/h_0, (term_1 + term_2) / h_0]
 
 def drawing_analytical():
+    free_flow_speed=40
+    inserting_speed=10
+    flow_level=.8
     for m_test in range(1,11):
         p_range=np.arange(0,1.01,0.05)
-        homo_m_4=[analytical_result(30, 10, 1., 3., .8, m_test, p, 3600 / 2200, 'homo') for p in p_range]
-        heter_m_4=[analytical_result(30, 10, 1., 3., .8, m_test, p, 3600 / 2200, 'heter') for p in p_range]
+        homo_m_4=[analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m_test, p, 3600 / 2200, 'homo') for p in p_range]
+        heter_m_4=[analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m_test, p, 3600 / 2200, 'heter') for p in p_range]
         y_list = [[a[0] for a in homo_m_4],
                   [a[0] for a in heter_m_4],
                   [a[1] for a in homo_m_4],
@@ -135,17 +139,15 @@ def drawing_analytical():
         style_list=['r-*','g-*','r:v','g:v']
         x_label='$p$'
         y_label=r'E[$o_{in}$] and E[$\tilde{\omega}$] ($h_0$)'
-        customized_x_ticks=[0,0.3,0.6,0.9]
+        customized_x_ticks=[0,0.2,0.4,0.6,0.8,1]
         customized_axis=[0, 1, 0, 4]
-        draw_fig('p_range_m=%s.png'%m_test, p_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
-
-    return None
+        draw_fig('probability_mono/ffs=%s fl=%s m=%s.png'%(free_flow_speed,flow_level,m_test), p_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
 
     m_range = range(1, 12)
 
-    homo_2=[analytical_result(30, 10, 1., 3., .8, m, 0.2, 3600 / 2200, 'homo') for m in m_range]
-    homo_5=[analytical_result(30, 10, 1., 3., .8, m, 0.5, 3600 / 2200, 'homo') for m in m_range]
-    homo_8=[analytical_result(30, 10, 1., 3., .8, m, 0.8, 3600 / 2200, 'homo') for m in m_range]
+    homo_2=[analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m, 0.2, 3600 / 2200, 'homo') for m in m_range]
+    homo_5=[analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m, 0.5, 3600 / 2200, 'homo') for m in m_range]
+    homo_8=[analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m, 0.8, 3600 / 2200, 'homo') for m in m_range]
     y_list=[[a[0] for a in homo_2],[a[0] for a in homo_5],[a[0] for a in homo_8],[a[1] for a in homo_2],[a[1] for a in homo_5],[a[1] for a in homo_8]]
     name_list=['E[$o_{in}$], p=0.2','E[$o_{in}$], p=0.5','E[$o_{in}$], p=0.8',r'E[$\tilde{\omega}$], p=0.2',r'E[$\tilde{\omega}$], p=0.5',r'E[$\tilde{\omega}$], p=0.8']
     style_list=['r-*','g-*','b-*','r:v','g:v','b:v']
@@ -153,9 +155,9 @@ def drawing_analytical():
     customized_axis=[1, 11, 0, 4]
     draw_fig('homo.png', m_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
 
-    heter_2 = [analytical_result(30, 10, 1., 3., .8, m, 0.2, 3600 / 2200, 'heter') for m in m_range]
-    heter_5 = [analytical_result(30, 10, 1., 3., .8, m, 0.5, 3600 / 2200, 'heter') for m in m_range]
-    heter_8 = [analytical_result(30, 10, 1., 3., .8, m, 0.8, 3600 / 2200, 'heter') for m in m_range]
+    heter_2 = [analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m, 0.2, 3600 / 2200, 'heter') for m in m_range]
+    heter_5 = [analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m, 0.5, 3600 / 2200, 'heter') for m in m_range]
+    heter_8 = [analytical_result(free_flow_speed, inserting_speed, 1., 3., flow_level, m, 0.8, 3600 / 2200, 'heter') for m in m_range]
     y_list = [[a[0] for a in heter_2], [a[0] for a in heter_5], [a[0] for a in heter_8], [a[1] for a in heter_2],
               [a[1] for a in heter_5], [a[1] for a in heter_8]]
     draw_fig('heter.png', m_range, y_list, name_list, style_list, x_label, y_label, customized_x_ticks, customized_axis)
@@ -320,6 +322,7 @@ def draw_fig(fig_name,x,y_list,name_list,style_list,x_label,y_label,customized_x
     plt.ylabel(y_label, fontsize=44)
     ax.set_position([0.1, 0.1, 0.6, 0.85])
     ax.legend(fontsize=36, loc='center left', bbox_to_anchor=(1, 0, 1.2, 1))
+    plt.title(fig_name.split('/')[-1][:-4],fontsize=38)
     plt.savefig(fig_name)
     plt.close()
     plt.clf()
