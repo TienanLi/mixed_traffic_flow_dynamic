@@ -138,7 +138,7 @@ def simulation_homo(o,lamb,p,amp_index,platoon_length,stochasticity_gap,stochast
 
         o_in = o_l - 1
         omega = 0
-
+        fail_to_resolve=False
         while o_l>0:
             if stochasticity_gap == 'd':
                 gap = lambda_expectation
@@ -171,8 +171,8 @@ def simulation_homo(o,lamb,p,amp_index,platoon_length,stochasticity_gap,stochast
                     un_amp=False
                 else:
                     if CF_type == 'exp':
-                        CF_coef_a_s=1.1**this_platoon_length
-                        CF_coef_a_l=1.05**this_platoon_length
+                        CF_coef_a_s=1.01**this_platoon_length
+                        CF_coef_a_l=1.005**this_platoon_length
                         if type:  # CF effects
                             o_CF += o_l * (CF_coef_a_s - 1)
                             o_l = o_l * CF_coef_a_s
@@ -181,25 +181,27 @@ def simulation_homo(o,lamb,p,amp_index,platoon_length,stochasticity_gap,stochast
                             o_CF += o_l * (CF_coef_a_l - 1)
                             o_l = o_l * CF_coef_a_l
                         if o_l>100:
+                            fail_to_resolve=True
                             break
                     if CF_type == 'linear':
                         CF_coef_a_s=0.1*this_platoon_length
                         CF_coef_a_l=.05*this_platoon_length
                         if type:  # CF effects
                             o_CF += CF_coef_a_s
-                            o_l = o_l + CF_coef_a_s
+                            o_l += CF_coef_a_s
                         if not type:
                             o_CF += CF_coef_a_l
-                            o_l = o_l + CF_coef_a_l
+                            o_l += CF_coef_a_l
                         if o_l>100:
+                            fail_to_resolve=True
                             break
-
-        o_in_g.append(o_in)
-        omega_g.append(omega)
-        o_cum.append(o_in+omega+o_CF)
-        used_gap.append(num)
-        platoon_number.append(j)
-        vehicle_number.append(num_veh)
+        if not fail_to_resolve:
+            o_in_g.append(o_in)
+            omega_g.append(omega)
+            o_cum.append(o_in+omega+o_CF)
+            used_gap.append(num)
+            platoon_number.append(j)
+            vehicle_number.append(num_veh)
     return (statistics.mean(o_in_g),statistics.mean(omega_g),statistics.mean(o_cum),statistics.mean(platoon_number),statistics.mean(vehicle_number))
 
 def simulation_heter(o,lamb,p,amp_index,platoon_length,stochasticity_gap,stochasticity_m,CF_type):
@@ -244,6 +246,7 @@ def simulation_heter(o,lamb,p,amp_index,platoon_length,stochasticity_gap,stochas
         o_in = o_l - 1
         omega = 0
 
+        fail_to_resolve=False
         while o_l>0:
             if stochasticity_gap == 'd':
                 gap = lambda_expectation
@@ -278,8 +281,8 @@ def simulation_heter(o,lamb,p,amp_index,platoon_length,stochasticity_gap,stochas
                         un_amp=False
                     else:
                         if CF_type == 'exp':
-                            CF_coef_a_s = 1.1
-                            CF_coef_a_l = 1.05
+                            CF_coef_a_s = 1.01
+                            CF_coef_a_l = 1.005
                             if type:  # CF effects
                                 o_CF += o_l * (CF_coef_a_s - 1)
                                 o_l = o_l * CF_coef_a_s
@@ -288,6 +291,7 @@ def simulation_heter(o,lamb,p,amp_index,platoon_length,stochasticity_gap,stochas
                                 o_l = o_l * CF_coef_a_l
 
                             if o_l > 100:
+                                fail_to_resolve=True
                                 break
                         if CF_type == 'linear':
                             CF_coef_a_s = 0.1
@@ -299,15 +303,15 @@ def simulation_heter(o,lamb,p,amp_index,platoon_length,stochasticity_gap,stochas
                                 o_CF += CF_coef_a_l
                                 o_l = o_l + CF_coef_a_l
                             if o_l > 100:
+                                fail_to_resolve=True
                                 break
-
-        o_in_g.append(o_in)
-        omega_g.append(omega)
-        o_cum.append(o_in + omega + o_CF)
-        used_gap.append(num)
-        platoon_number.append(j)
-        vehicle_number.append(num_veh)
-
+        if not fail_to_resolve:
+            o_in_g.append(o_in)
+            omega_g.append(omega)
+            o_cum.append(o_in + omega + o_CF)
+            used_gap.append(num)
+            platoon_number.append(j)
+            vehicle_number.append(num_veh)
     return (statistics.mean(o_in_g),statistics.mean(omega_g),statistics.mean(o_cum),statistics.mean(platoon_number),statistics.mean(vehicle_number))
 
 def ran_type_multiple(a_group,p_group):
@@ -455,7 +459,7 @@ def drawing_sensitivity():
     heter_chain = []
     a_l = 3.
     a_s = 1.
-    tested_probability = np.arange(0.2, 1.01, 0.3)
+    tested_probability = np.arange(0.2, 1.01, .3)
     for a_l_penetration_rate in tested_probability:
         homo_chain.append([])
         heter_chain.append([])
@@ -463,13 +467,13 @@ def drawing_sensitivity():
         for p_l in range(1,11):
             # expectation_chain.append(not_amplified(o,.25*p_l))
             homo_chain[line].append(simulation_homo(o, .25*p_l, p=a_l_penetration_rate, amp_index=a_l / a_s,
-                                                    platoon_length = p_l,stochasticity_gap='r',stochasticity_m='d', CF_type='no'))
-            heter_chain[line].append(simulation_heter(o, .25*p_l, p=a_l_penetration_rate, amp_index=a_l / a_s,
-                                                      platoon_length = p_l,stochasticity_gap='r',stochasticity_m='d', CF_type='no'))
+                                                    platoon_length = p_l,stochasticity_gap='r',stochasticity_m='r', CF_type='no'))
+            heter_chain[line].append(simulation_homo(o, .25*p_l, p=a_l_penetration_rate, amp_index=a_l / a_s,
+                                                      platoon_length = p_l,stochasticity_gap='r',stochasticity_m='r', CF_type='linear'))
         line += 1
 
-    label_1='homo'
-    label_2='heter'
+    label_1='no CF'
+    label_2='linear CF'
     a_l_penetration_rate_group = tested_probability
     fig = plt.figure(figsize=(6, 6), dpi=100, tight_layout=True)
     bx = fig.add_subplot(111)
@@ -484,7 +488,6 @@ def drawing_sensitivity():
     plt.xlabel('m')
     plt.savefig('j.png')
     # plt.show()
-
 
     fig = plt.figure(figsize=(6, 6), dpi=100, tight_layout=True)
     bx = fig.add_subplot(111)
