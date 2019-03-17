@@ -82,16 +82,21 @@ def simple_simulation(initial_void_l,lambda_expectation,a_l,a_s,n_l,n_s,platoon_
     print(statistics.mean(o_initial_g),statistics.mean(omega_g),statistics.mean(o_cum))
     return statistics.mean(o_cum)
 
-def line():
-    r_ls=(1/0.5-1)
-    h_0=1
-    s=0.8
-    m=4
-    o_in_s=(30-10)**2/2/30/0.5/3600*2200
-    o_in_l=(30-10)**2/2/30/1/3600*2200
+def line(n_s_set,n_l_set):
+    r_ls=(a_l/a_s-1)
+    h_0=3600/capacity
+    lamb=(1/s-1)*platoon_length*h_0
+    o_in_s=(30-10)**2/2/30/a_s
+    o_in_l=(30-10)**2/2/30/a_l
     print(o_in_s,o_in_l)
-    x=[0,1]
-    y=[o_in_s-r_ls*h_0*(1/s-1)*m/2,o_in_s-r_ls*h_0*(1/s-1)*m/2+r_ls*h_0*1*(1-(1/s-1)*m/2)]
+    x=[]
+    y=[]
+    for i in range(len(n_s_set)):
+        veh_period=n_s_set[i]+n_l_set[i]
+        p_l=n_l_set[i]/veh_period
+        p_s=1-p_l
+        x.append(p_l)
+        y.append((o_in_s+p_l*(h_0*r_ls-lamb*r_ls*(p_s+p_l/2+3/2/veh_period)))/h_0)
     print(x,y)
     return x,y
 
@@ -100,23 +105,33 @@ def draw_figure(n_s_set,n_l_set,o_cum):
     bx = fig.add_subplot(111)
     for i in range(len(n_s_set)):
         bx.scatter(n_l_set[i]/(n_l_set[i]+n_s_set[i]), o_cum[i])
-    x,y=line()
+    x,y=line(n_s_set,n_l_set)
     bx.plot(x,y)
-    plt.xlabel('p')
+    plt.xlabel('p_l')
     plt.savefig('o_cum.png')
     # plt.show()
 
 def main():
+    global a_l,a_s,s,platoon_length,capacity
     capacity=2200
-    platoon_length=4
     a_l=1
     a_s=0.5
-    n_l=1
+    s=0.8
+    platoon_length=8
+
     o_cum=[]
     n_s_set=[]
     n_l_set=[]
-    for n_s in range(1,10):
-        o_cum.append(simple_simulation((30-10)**2/2/30/a_l/3600*capacity+1,.25*platoon_length,a_l,a_s,n_l,n_s,4,'homo'))
+    n_l=1
+    for n_s in range(9,0,-1):
+        o_cum.append(simple_simulation((30-10)**2/2/30/a_l/3600*capacity+1,(1/s-1)*platoon_length,a_l,a_s,n_l,n_s,4,'homo'))
+        n_s_set.append(n_s)
+        n_l_set.append(n_l)
+    n_s = 1
+    for n_l in range(2, 10, 1):
+        o_cum.append(
+            simple_simulation((30 - 10) ** 2 / 2 / 30 / a_l / 3600 * capacity + 1, (1/s-1) * platoon_length, a_l, a_s, n_l,
+                              n_s, 4, 'homo'))
         n_s_set.append(n_s)
         n_l_set.append(n_l)
     draw_figure(n_s_set,n_l_set,o_cum)
